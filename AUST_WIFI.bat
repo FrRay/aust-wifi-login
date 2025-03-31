@@ -1,14 +1,20 @@
 @echo off
+set wifiName=AUST_Student
+set userId=“你的学号”
+set Password=“你的密码”
+set operatorCode=“运营商cmcc/移动|unicom/联通|aust/电信 eg:unicom”
 
-REM 定义Python文件的路径
-set PYTHON_FILE=main.py
+ping -n 1 -w 100 10.255.0.19 | findstr /i "TTL" >nul
+if %ERRORLEVEL% equ 0 goto POST
+@echo on
+netsh wlan connect name = %wifiName%
 
-REM 启动Python文件
-python %PYTHON_FILE%
+@echo off
+:CHECK_CONNECTION
+netsh wlan show interface | findstr /i /e %wifiName% >nul
+if %ERRORLEVEL% neq 0 goto CHECK_CONNECTION
 
-REM 如果你使用的是Python虚拟环境，你可以这样启动：
-REM call path\to\your\venv\Scripts\activate
-REM python %PYTHON_FILE%
-REM call deactivate
-
-pause
+:POST
+@echo on
+curl --max-time 2 --retry 4 --retry-delay 1 -d "callback=dr1003&DDDDD=%userId%@%operatorCode%&upass=%Password%&0MKKey=123456" http://10.255.0.19/drcom/login
+curl --max-time 2 --retry 4 --retry-delay 1 -d "callback=dr1003&DDDDD=%userId%@%operatorCode%&upass=%Password%&0MKKey=123456" http://10.255.0.19/drcom/login
